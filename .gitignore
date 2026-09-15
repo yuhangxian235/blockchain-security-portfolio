@@ -1,0 +1,14 @@
+# Python virtualenv / cache
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Secrets — never commit the real .env
+.env
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
