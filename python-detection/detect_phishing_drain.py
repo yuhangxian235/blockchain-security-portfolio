@@ -143,23 +143,38 @@ def main(lookback, drain_window):
     print(f"Unlimited approvals (excluding known routers): {len(candidates)}")
     print("-" * 78)
 
+    # Caches: many candidates share the same spender (routers) and even the same
+    # owner. Cuts RPC calls by an order of magnitude when scanning wide ranges.
+    code_cache = {}      # spender -> bool(is_contract)
+    nonce_cache = {}     # (owner, block) -> pre_nonce
+
+    def spender_is_contract(sp):
+        if sp not in code_cache:
+            try:
+                code_cache[sp] = len(w3.eth.get_code(sp)) > 2
+            except Exception:
+                code_cache[sp] = False
+        return code_cache[sp]
+
+    def owner_pre_nonce(own, ablk):
+        key = (own, ablk - 1)
+        if key not in nonce_cache:
+            try:
+                nonce_cache[key] = w3.eth.get_transaction_count(own, block_identifier=ablk - 1)
+            except Exception:
+                nonce_cache[key] = 999
+        return nonce_cache[key]
+
     # --- Step 3: filter to fresh owners + contract spenders; check R2 outflow ---
     hits = 0
     for (owner, spender, token), (ablock, _, _, _) in candidates.items():
-        # 3a. owner freshness: nonce at the block just BEFORE the approval
-        try:
-            pre_nonce = w3.eth.get_transaction_count(owner, block_identifier=ablock - 1)
-        except Exception:
-            pre_nonce = 999
-        if pre_nonce > MAX_FRESH_NONCE:
+        # 3b first (cached, cheap): spender must be a contract
+        if not spender_is_contract(spender):
             continue
 
-        # 3b. spender must be a contract
-        try:
-            code = w3.eth.get_code(spender)
-        except Exception:
-            code = b""
-        if len(code) <= 2:                # empty / "0x" => EOA, not a contract
+        # 3a. owner freshness: nonce at the block just BEFORE the approval
+        pre_nonce = owner_pre_nonce(owner, ablock)
+        if pre_nonce > MAX_FRESH_NONCE:
             continue
 
         # 3c (R2): any Transfer(from=owner) to a non-self address in the window?
