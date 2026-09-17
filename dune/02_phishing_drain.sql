@@ -11,7 +11,7 @@ WITH approvals AS (
          spender,
          evt_block_time,
          evt_block_number
-  FROM ethereum."ERC20_evt_Approval"
+  FROM ethereum.erc20_evt_approval
   WHERE evt_block_time >= now() - interval '30' day
     AND value = CAST('57896044618658097711785492504343953926634992332820282019728792003956564819935' AS DECIMAL(78,0))
 ),
@@ -22,7 +22,7 @@ drains AS (
          value,
          evt_block_time,
          evt_block_number
-  FROM ethereum."ERC20_evt_Transfer"
+  FROM ethereum.erc20_evt_transfer
   WHERE evt_block_time >= now() - interval '30' day
     AND "from" <> "to"
 )

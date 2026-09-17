@@ -10,7 +10,7 @@ WITH unlim AS (
     contract_address,
     owner,
     spender
-  FROM ethereum."ERC20_evt_Approval"
+  FROM ethereum.erc20_evt_approval
   WHERE evt_block_time >= now() - interval '90' day
     AND value = CAST('57896044618658097711785492504343953926634992332820282019728792003956564819935' AS DECIMAL(78,0))  -- 2^256-1
     AND spender NOT IN (
