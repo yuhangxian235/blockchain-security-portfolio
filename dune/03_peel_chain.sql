@@ -27,7 +27,7 @@ SELECT
   count(*)                                           AS num_out_txs
 FROM outs
 GROUP BY node
-HAVING count(DISTINCT child) >= 3          # split into 3+ children
-   AND sum(eth) > 5                         # non-trivial amount
+HAVING count(DISTINCT child) >= 3          -- split into 3+ children
+   AND sum(eth) > 5                         -- non-trivial amount
 ORDER BY fanout_width DESC, total_out_eth DESC
 LIMIT 500;
