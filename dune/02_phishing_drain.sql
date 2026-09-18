@@ -10,8 +10,8 @@
 WITH approvals AS (
   SELECT
     contract_address,
-    substring(topic1, 13) AS owner,
-    substring(topic2, 13) AS spender,
+    bytearray_substring(topic1, 13, 20) AS owner,
+    bytearray_substring(topic2, 13, 20) AS spender,
     block_time
   FROM ethereum.logs
   WHERE topic0 = 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925
@@ -21,8 +21,8 @@ WITH approvals AS (
 drains AS (
   SELECT
     contract_address,
-    substring(topic1, 13) AS victim,
-    substring(topic2, 13) AS receiver,
+    bytearray_substring(topic1, 13, 20) AS victim,
+    bytearray_substring(topic2, 13, 20) AS receiver,
     block_time
   FROM ethereum.logs
   WHERE topic0 = 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
