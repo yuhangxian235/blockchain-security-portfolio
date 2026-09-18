@@ -20,9 +20,9 @@ WITH outs AS (
     AND block_time >= now() - interval '30' day
 )
 SELECT
-  node,
+  '0x' || lower(to_hex(node))                          AS node,
   min(block_number)                                   AS first_out_block,
-  sum(eth)                                           AS total_out_eth,
+  round(sum(eth), 4)                                 AS total_out_eth,
   count(DISTINCT child)                              AS fanout_width,
   count(*)                                           AS num_out_txs
 FROM outs
